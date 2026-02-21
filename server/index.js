@@ -243,9 +243,13 @@ app.get("/api/crime-heatmap", async (req, res) => {
     if (year === 2025) {
       // Prioritize fetching from MongoDB
       if (!useMemory) {
-        let data = await CrimeIncident.find({ year: 2025 });
-        if (data.length > 0) {
-          return res.json(data);
+        try {
+          let data = await CrimeIncident.find({ year: 2025 }).timeout(5000);
+          if (data.length > 0) {
+            return res.json(data);
+          }
+        } catch (dbErr) {
+          console.error("DB fetch failed, falling back to file:", dbErr.message);
         }
       }
 
@@ -255,7 +259,7 @@ app.get("/api/crime-heatmap", async (req, res) => {
         const rawData = fs.readFileSync(dataPath, "utf-8");
         const jsonData = JSON.parse(rawData);
         // Map to include year for filtering if needed
-        return res.json(jsonData.map(item => ({ ...item, year: 2025 })));
+        return res.json(jsonData.map(item => ({ ...item, year: 2025, _id: item.id })));
       }
     }
 
@@ -277,7 +281,7 @@ app.get("/api/crime-heatmap", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Failed to load heatmap data" });
+    res.status(500).json({ message: "Failed to load heatmap data", error: err.toString() });
   }
 });
 
