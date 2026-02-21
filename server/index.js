@@ -12,7 +12,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const port = process.env.PORT || 5000;
-const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/safety_app";
+const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/safety_app_v2";
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -64,32 +64,11 @@ const CrimeIncident = mongoose.model("CrimeIncident", crimeIncidentSchema, "crim
 const memoryStorage = {
   users: [],
   sosEvents: [],
-  complaints: [
-    {
-      _id: "report-1",
-      username: "demo_user",
-      crimeType: "Theft",
-      description: "Bicycle stolen near Central Park entrance",
-      location: "Central Park, Mumbai",
-      date: "2026-01-30",
-      status: "Pending",
-      createdAt: new Date()
-    },
-    {
-      _id: "report-2",
-      username: "safety_first",
-      crimeType: "Harassment",
-      description: "Inappropriate behavior reported at the bus stop",
-      location: "Worli Sea Face",
-      date: "2026-01-31",
-      status: "Under Investigation",
-      createdAt: new Date()
-    }
-  ],
+  complaints: [], // Cleared for fresh start
   crimeIncidents: [
-    { _id: "1", lat: 19.076, lng: 72.8777, intensity: 0.9, category: "high", year: 2024 },
-    { _id: "2", lat: 19.2183, lng: 72.9781, intensity: 0.6, category: "medium", year: 2024 },
-    { _id: "3", lat: 19.051, lng: 72.900, intensity: 0.3, category: "low", year: 2024 }
+    { _id: "1", lat: 19.076, lng: 72.8777, intensity: 0.9, category: "high", year: 2025 }, // Updated year
+    { _id: "2", lat: 19.2183, lng: 72.9781, intensity: 0.6, category: "medium", year: 2025 },
+    { _id: "3", lat: 19.051, lng: 72.900, intensity: 0.3, category: "low", year: 2025 }
   ]
 };
 
