@@ -12,7 +12,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const port = process.env.PORT || 5000;
-const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/safety_app_v2";
+const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/guardian_eye_db";
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -20,7 +20,18 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   helplineNumber: { type: String, required: true },
-  phoneNumbers: [{ type: String, required: true }],
+  phoneNumbers: [{ type: String, required: true }], // Legacy support
+  trustedContacts: [{
+    name: String,
+    phone: String,
+    relation: String
+  }],
+  medicalInfo: {
+    bloodGroup: String,
+    allergies: String,
+    conditions: String
+  },
+  homeAddress: String,
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -35,6 +46,9 @@ const sosEventSchema = new mongoose.Schema({
     lng: Number,
     address: String
   },
+  status: { type: String, enum: ["Active", "Resolved", "False Alarm"], default: "Active" },
+  alertType: { type: String, enum: ["General", "Medical", "Police", "Fire"], default: "General" },
+  evidence: [{ type: String }], // URLs to audio/video
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -43,14 +57,17 @@ const crimeIncidentSchema = new mongoose.Schema({
   lng: Number,
   intensity: { type: Number, min: 0, max: 1 },
   category: { type: String, enum: ["low", "medium", "high"] },
+  severity: { type: String, enum: ["Critical", "High", "Medium", "Low"], default: "Medium" },
   year: Number,
-  // Added fields for reports
   username: String,
   crimeType: String,
   description: String,
   location: String,
   date: String,
   status: { type: String, default: "Pending" },
+  verified: { type: Boolean, default: false },
+  media: [{ type: String }], // URLs to images/videos
+  upvotes: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -66,9 +83,9 @@ const memoryStorage = {
   sosEvents: [],
   complaints: [], // Cleared for fresh start
   crimeIncidents: [
-    { _id: "1", lat: 19.076, lng: 72.8777, intensity: 0.9, category: "high", year: 2025 }, // Updated year
-    { _id: "2", lat: 19.2183, lng: 72.9781, intensity: 0.6, category: "medium", year: 2025 },
-    { _id: "3", lat: 19.051, lng: 72.900, intensity: 0.3, category: "low", year: 2025 }
+    { _id: "1", lat: 19.076, lng: 72.8777, intensity: 0.9, category: "high", severity: "High", year: 2025, verified: true },
+    { _id: "2", lat: 19.2183, lng: 72.9781, intensity: 0.6, category: "medium", severity: "Medium", year: 2025, verified: true },
+    { _id: "3", lat: 19.051, lng: 72.900, intensity: 0.3, category: "low", severity: "Low", year: 2025, verified: true }
   ]
 };
 
